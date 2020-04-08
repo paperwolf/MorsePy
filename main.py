@@ -2,6 +2,6 @@ from classes import *
 from curses import wrapper
 
 def main(screen):
-	Morse().loop()
+    Morse().loop()
 
 wrapper(main)

@@ -33,10 +33,10 @@ class Morse():
         self.flag_show_time     = True
 
         # DEFINES
-        self.dot_duration               = 0.05
-        self.dash_duration              = 3 * self.dot_duration
-        self.letter_space_duration      = 3 * self.dot_duration
-        self.word_space_duration        = 12 * self.dot_duration
+        self.dot_duration           = 0.05
+        self.dash_duration          = 3 * self.dot_duration
+        self.letter_space_duration  = 3 * self.dot_duration
+        self.word_space_duration    = 12 * self.dot_duration
         self.morse_dict = {
             '.-'    :   'A',
             '-...'  :   'B',
@@ -193,12 +193,12 @@ class Morse():
 
     def handle_backspace(self):
         self.clear_print_strings()
-        self.morse_string = ''
-        self.alpha_string = ''
-        self.morse_char = ''
+        self.morse_string   = ''
+        self.alpha_string   = ''
+        self.morse_char     = ''
         
-        self.press_time = self.start_time
-        self.release_time = self.start_time
+        self.press_time     = self.start_time
+        self.release_time   = self.start_time
         self.last_key_event = None
 
     def handle_press(self):
