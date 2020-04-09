@@ -75,7 +75,9 @@ class Morse():
             '...---...':'SOS'
         }
 
-        self.attr_dict = {}
+        self.attr_dict = {
+            # ATTRIBUTE_LOOKUP: {'pos':[Y,X], 'str':STRING, 'calc':GETTER_FUNCTION}
+        }
 
     #=====================#
     # STRING CALCULATIONS #
@@ -124,7 +126,7 @@ class Morse():
         string  = attr['str']
         value   = (override if type(override) == str else attr['calc']())
 
-        self.curses_print(pos,0,string.format(value))
+        self.curses_print(pos[0],pos[1],string.format(value))
 
     def attr_erase(self, attr_str):
         if attr_str == MORSE_STRING:
@@ -228,13 +230,13 @@ class MorseDebug(Morse):
         Morse.__init__(self)
 
         self.attr_dict = {
-            CURRENT_TIME    : {'pos':2,     'str':STR_CURRENT_TIME,     'calc':self.get_current_time},
-            SPACE_DURATION  : {'pos':3,     'str':STR_SPACE_DURATION,   'calc':self.get_space_duration},
-            PRESS_DURATION  : {'pos':4,     'str':STR_PRESS_DURATION,   'calc':self.get_press_duration},
-            CURRENT_KEY     : {'pos':6,     'str':STR_CURRENT_KEY,      'calc':self.get_current_key},
-            LAST_MORSE      : {'pos':7,     'str':STR_LAST_MORSE,       'calc':self.get_last_morse},
-            MORSE_STRING    : {'pos':9,     'str':STR_MORSE_STR,        'calc':self.get_morse_string},
-            ALPHA_STRING    : {'pos':10,    'str':STR_ALPHA_STR,        'calc':self.get_alpha_string}
+            CURRENT_TIME    : {'pos':[2,0],     'str':STR_CURRENT_TIME,     'calc':self.get_current_time},
+            SPACE_DURATION  : {'pos':[3,0],     'str':STR_SPACE_DURATION,   'calc':self.get_space_duration},
+            PRESS_DURATION  : {'pos':[4,0],     'str':STR_PRESS_DURATION,   'calc':self.get_press_duration},
+            CURRENT_KEY     : {'pos':[6,0],     'str':STR_CURRENT_KEY,      'calc':self.get_current_key},
+            LAST_MORSE      : {'pos':[7,0],     'str':STR_LAST_MORSE,       'calc':self.get_last_morse},
+            MORSE_STRING    : {'pos':[9,0],     'str':STR_MORSE_STR,        'calc':self.get_morse_string},
+            ALPHA_STRING    : {'pos':[10,0],    'str':STR_ALPHA_STR,        'calc':self.get_alpha_string}
         }
 
     #================#
