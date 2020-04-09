@@ -29,9 +29,6 @@ class Morse():
         self.morse_string       = ''
         self.alpha_string       = ''
 
-        # FLAGS
-        self.flag_show_time     = True
-
         # DEFINES
         self.dot_duration           = 0.05
         self.dash_duration          = 3 * self.dot_duration
@@ -78,32 +75,7 @@ class Morse():
             '...---...':'SOS'
         }
 
-        # UI
-        self.curses_pos_current_time    = 2
-        self.curses_pos_space_duration  = self.curses_pos_current_time + 1
-        self.curses_pos_press_duration  = self.curses_pos_current_time + 2
-
-        self.curses_pos_current_key     = self.curses_pos_press_duration + 2
-        self.curses_pos_last_morse      = self.curses_pos_current_key + 1
-
-        self.curses_pos_morse_string    = self.curses_pos_last_morse + 2
-        self.curses_pos_alpha_string    = self.curses_pos_morse_string + 1
-
-        self.attr_dict = {
-            CURRENT_TIME    : {'pos':self.curses_pos_current_time,      'str':STR_CURRENT_TIME,     'calc':self.get_current_time},
-            SPACE_DURATION  : {'pos':self.curses_pos_space_duration,    'str':STR_SPACE_DURATION,   'calc':self.get_space_duration},
-            PRESS_DURATION  : {'pos':self.curses_pos_press_duration,    'str':STR_PRESS_DURATION,   'calc':self.get_press_duration},
-            CURRENT_KEY     : {'pos':self.curses_pos_current_key,       'str':STR_CURRENT_KEY,      'calc':self.get_current_key},
-            LAST_MORSE      : {'pos':self.curses_pos_last_morse,        'str':STR_LAST_MORSE,       'calc':self.get_last_morse},
-            MORSE_STRING    : {'pos':self.curses_pos_morse_string,      'str':STR_MORSE_STR,        'calc':self.get_morse_string},
-            ALPHA_STRING    : {'pos':self.curses_pos_alpha_string,      'str':STR_ALPHA_STR,        'calc':self.get_alpha_string}
-        }
-
-        self.stdscr = curses.initscr()
-        self.stdscr.keypad(True)
-        curses.noecho()
-        curses.cbreak()
-        curses.endwin()
+        self.attr_dict = {}
 
     #=====================#
     # STRING CALCULATIONS #
@@ -130,9 +102,17 @@ class Morse():
     def get_alpha_string(self):
         return self.alpha_string
 
-    #====================#
-    # UI PRINT FUNCTIONS #
-    #====================#
+    #==================#
+    # CURSES FUNCTIONS #
+    #==================#
+
+    def init_curses(self):
+        self.stdscr = curses.initscr()
+        self.stdscr.keypad(True)
+        curses.curs_set(False)
+        curses.noecho()
+        curses.cbreak()
+        curses.endwin()
 
     def curses_print(self, y, x, string):
         self.stdscr.addstr(y, x, string)
@@ -153,14 +133,6 @@ class Morse():
             self.attr_print(attr_str, len(self.alpha_string)*' ')
         else:
             self.attr_print(attr_str, ' '*80)
-
-    def clear_print_strings(self):
-        self.attr_erase(CURRENT_TIME)
-        self.attr_erase(PRESS_DURATION)
-        self.attr_erase(SPACE_DURATION)
-        self.attr_erase(LAST_MORSE)
-        self.attr_erase(MORSE_STRING)
-        self.attr_erase(ALPHA_STRING)
 
     #============================#
     # MORSE CONVERSION FUNCTIONS #
@@ -188,11 +160,98 @@ class Morse():
     #================#
 
     def handle_key_event(self, event):
+        pass
+
+    def handle_backspace(self):
+        pass
+
+    def handle_press(self):
+        pass
+
+    def handle_release(self):
+        pass
+
+    def handle_space(self):
+        pass
+
+    #============#
+    # MORSE LOOP #
+    #============#
+
+    def esc_key_pressed(self):
+        return self.last_key == keyboard.Key.esc
+
+    def update_UI(self):
+        pass
+
+    def init_loop(self):
+        self.init_curses()
+
+        # Prevents initial ENTER release from being returned by event getter.
+        self.curses_print(0,0,'Initializing...')
+        time.sleep(0.1)
+        self.curses_print(0,0,'[Press BACKSPACE to clear. Press ESC to exit.]')
+        for attr_str in self.attr_dict.keys():
+            self.attr_print(attr_str, '')
+
+        self.start_time = time.time()
+
+    def loop(self):
+        self.init_loop()
+
+        with keyboard.Events() as events:
+            while not self.esc_key_pressed():
+                try:
+                    event = events.get(0.00001)
+                    # Only call event handlers when press changes to release or vice versa.
+                    if type(event) != type(self.last_key_event):
+                        self.handle_key_event(event)
+                        if event.key == keyboard.Key.backspace:
+                            self.handle_backspace()
+                        else:
+                            # PRESS OR RELEASE
+                            if type(event) == keyboard.Events.Press:
+                                self.handle_press()
+                            elif type(event) == keyboard.Events.Release:
+                                self.handle_release()
+                except:
+                    # NO KEY PRESSED
+                    self.handle_space()
+                finally:
+                    self.update_UI()
+
+        self.stdscr.clear()
+        curses.endwin()
+
+class MorseDebug(Morse):
+    def __init__(self):
+        Morse.__init__(self)
+
+        self.attr_dict = {
+            CURRENT_TIME    : {'pos':2,     'str':STR_CURRENT_TIME,     'calc':self.get_current_time},
+            SPACE_DURATION  : {'pos':3,     'str':STR_SPACE_DURATION,   'calc':self.get_space_duration},
+            PRESS_DURATION  : {'pos':4,     'str':STR_PRESS_DURATION,   'calc':self.get_press_duration},
+            CURRENT_KEY     : {'pos':6,     'str':STR_CURRENT_KEY,      'calc':self.get_current_key},
+            LAST_MORSE      : {'pos':7,     'str':STR_LAST_MORSE,       'calc':self.get_last_morse},
+            MORSE_STRING    : {'pos':9,     'str':STR_MORSE_STR,        'calc':self.get_morse_string},
+            ALPHA_STRING    : {'pos':10,    'str':STR_ALPHA_STR,        'calc':self.get_alpha_string}
+        }
+
+    #================#
+    # EVENT HANDLERS #
+    #================#
+
+    def handle_key_event(self, event):
         self.last_key_event = event
         self.last_key = event.key
 
     def handle_backspace(self):
-        self.clear_print_strings()
+        self.attr_erase(CURRENT_TIME)
+        self.attr_erase(PRESS_DURATION)
+        self.attr_erase(SPACE_DURATION)
+        self.attr_erase(LAST_MORSE)
+        self.attr_erase(MORSE_STRING)
+        self.attr_erase(ALPHA_STRING)
         self.morse_string   = ''
         self.alpha_string   = ''
         self.morse_char     = ''
@@ -248,44 +307,3 @@ class Morse():
         elif type(self.last_key_event) == keyboard.Events.Release:
             self.attr_print(SPACE_DURATION)
             self.attr_erase(CURRENT_KEY)
-
-    def init_loop(self):
-        self.stdscr.clear()
-        self.stdscr = curses.initscr()
-        curses.curs_set(False)
-
-        # Prevents initial ENTER release from being returned by event getter.
-        self.curses_print(0,0,'Initializing...')
-        time.sleep(0.1)
-        self.curses_print(0,0,'[Press BACKSPACE to clear. Press ESC to exit.]')
-        for attr_str in self.attr_dict.keys():
-            self.attr_print(attr_str, '')
-
-        self.start_time = time.time()
-
-    def loop(self):
-        self.init_loop()
-
-        with keyboard.Events() as events:
-            while not self.esc_key_pressed():
-                try:
-                    event = events.get(0.00001)
-                    # Only call event handlers when press changes to release or vice versa.
-                    if type(event) != type(self.last_key_event):
-                        self.handle_key_event(event)
-                        if event.key == keyboard.Key.backspace:
-                            self.handle_backspace()
-                        else:
-                            # PRESS OR RELEASE
-                            if type(event) == keyboard.Events.Press:
-                                self.handle_press()
-                            elif type(event) == keyboard.Events.Release:
-                                self.handle_release()
-                except:
-                    # NO KEY PRESSED
-                    self.handle_space()
-                finally:
-                    self.update_UI()
-
-        self.stdscr.clear()
-        curses.endwin()
